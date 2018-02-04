@@ -12,23 +12,24 @@ class NotesList extends React.Component {
     render() {
         const data = this.props.data;
 
-        const noteItems = data.map((note) =>
+        const noteList = data.map((note) =>
             <Note key={note.Id} title={note.Title} content={note.Content} />
         );
 
-        return (
-            <div className="notes-list">{noteItems}</div>
-        );
+        return <div className="notes-list">{noteList}</div>;
     }
 }
 
 class NotesComponent extends React.Component {
     constructor(props) {
         super(props);
+
+        // Set intial state.
         this.state = { data: [] };
     }
 
     componentDidMount() {
+        // Get JSON from API and set as state.
         const url = "http://localhost:51781/api/notes";
         $.getJSON(url, function (data) {
             this.setState({ data: data });

@@ -19,7 +19,7 @@ namespace NotesAppReact.Controllers
         // GET: api/Notes
         public IQueryable<Note> GetNotes()
         {
-            return db.Notes;
+            return db.Notes.OrderByDescending(n => n.Created);
         }
 
         // GET: api/Notes/5
