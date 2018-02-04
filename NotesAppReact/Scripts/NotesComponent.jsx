@@ -9,10 +9,12 @@ class Note extends React.Component {
     }
 
     onDeleteNote(evt) {
+        // Call onRemoveNote event in parent component, passing in note ID.
         this.props.onRemoveNote(evt, this.props.noteid);
     }
 
     render() {
+        // Conditionally show delete button.
         let button = null;
         if (this.props.showDelete) {
             button = <a href="#" onClick={this.onDeleteNote.bind(this)}>Delete</a>;
@@ -48,6 +50,7 @@ class NotesComponent extends React.Component {
     }
 
     onRemoveNote(evt, id) {
+        // Remove the note and update the component state
         const url = "http://localhost:51781/api/notes/" + id;
         $.ajax({
             type: 'DELETE',
@@ -55,7 +58,6 @@ class NotesComponent extends React.Component {
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (newData) {
-                // Remove note from data in state.
                 var items = this.state.data.filter((note) => note.Id !== newData.Id);
                 this.setState({ data: items });
             }.bind(this),
@@ -66,6 +68,7 @@ class NotesComponent extends React.Component {
     }
 
     render() {
+        // Create list of notes to display.
         const noteList = this.state.data.map(function (note) {
             return <Note key={note.Id} noteid={note.Id} title={note.Title} content={note.Content} onRemoveNote={this.onRemoveNote.bind(this)} showDelete={true} />;
         }.bind(this));
@@ -100,6 +103,7 @@ class NoteComponent extends React.Component {
     }
 
     render() {
+        // Render a single note
         return <div className="note-component">
             <Note noteid={this.state.note.Id} title={this.state.note.Title} content={this.state.note.Content} showDelete={false} />
         
@@ -111,14 +115,17 @@ class NoteComponent extends React.Component {
 class AddNoteComponent extends React.Component {
     constructor(props) {
         super(props);
+        // Set initial state.
         this.state = { title: '', content: '' };
     }
 
     onTitleChanged(evt) {
+        // When content of text input changes update the state
         this.setState({ title: evt.target.value,  });
     }
 
     onContentChanged(evt) {
+        // When content of text input changes update the state
         this.setState({ content: evt.target.value });
     }
 
@@ -130,6 +137,7 @@ class AddNoteComponent extends React.Component {
             Created: new Date().toUTCString()
         };
 
+        // Add note through API
         $.ajax({
             type: 'POST',
             url: 'http://localhost:51781/api/Notes',
@@ -178,7 +186,7 @@ class AddNoteComponent extends React.Component {
     }
 }
 
-// Route various URL to their components
+// Route URLs to the components we want them to display
 const content = document.getElementById("content");
 router.on('/notes/add', function () {
     // Display add note component.
