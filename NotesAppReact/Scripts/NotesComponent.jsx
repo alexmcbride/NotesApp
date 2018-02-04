@@ -8,23 +8,21 @@ class Note extends React.Component {
         evt.preventDefault();
     }
 
+    onDeleteNote(evt) {
+        this.props.onRemoveNote(evt, this.props.noteid);
+    }
+
     render() {
+        let button = null;
+        if (this.props.showDelete) {
+            button = <a href="#" onClick={this.onDeleteNote.bind(this)}>Delete</a>;
+        }
+
         return <div className="note">
             <h2><a href="#" onClick={this.onSelectNote.bind(this)}>{this.props.title}</a></h2>
             <p>{this.props.content}</p>
+            {button}
         </div>;
-    }
-}
-
-class NotesList extends React.Component {
-    render() {
-        const data = this.props.data;
-
-        const noteList = data.map((note) =>
-            <Note key={note.Id} noteid={note.Id} title={note.Title} content={note.Content} />
-        );
-
-        return <div className="notes-list">{noteList}</div>;
     }
 }
 
@@ -49,10 +47,32 @@ class NotesComponent extends React.Component {
         evt.preventDefault();
     }
 
+    onRemoveNote(evt, id) {
+        const url = "http://localhost:51781/api/notes/" + id;
+        $.ajax({
+            type: 'DELETE',
+            url: url,
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (newData) {
+                // Remove note from data in state.
+                var items = this.state.data.filter((note) => note.Id !== newData.Id);
+                this.setState({ data: items });
+            }.bind(this),
+            failure: function (errMsg) {
+                alert("Error: " + errMsg);
+            }
+        });
+    }
+
     render() {
+        const noteList = this.state.data.map(function (note) {
+            return <Note key={note.Id} noteid={note.Id} title={note.Title} content={note.Content} onRemoveNote={this.onRemoveNote.bind(this)} showDelete={true} />;
+        }.bind(this));
+
         return <div className="notes-component">
             <h1>Notes</h1>
-            <NotesList data={this.state.data} />
+            {noteList}
             <form onSubmit={this.onAddNote}>
                 <input type="submit" value="Add Note" />
             </form>
@@ -70,7 +90,6 @@ class NoteComponent extends React.Component {
         // Get JSON from API and set as state.
         const url = "http://localhost:51781/api/notes/" + this.props.id;
         $.getJSON(url, function (data) {
-            console.log(data);
             this.setState({ note: data });
         }.bind(this));
     }
@@ -81,7 +100,7 @@ class NoteComponent extends React.Component {
 
     render() {
         return <div className="note-component">
-            <Note noteid={this.state.note.Id} title={this.state.note.Title} content={this.state.note.Content} />
+            <Note noteid={this.state.note.Id} title={this.state.note.Title} content={this.state.note.Content} showDelete={false} />
 
             <form>
                 <input type="button" value="Go back..." onClick={this.onGoBack} />
@@ -105,14 +124,12 @@ class AddNoteComponent extends React.Component {
     }
 
     onAddNote(evt) {
-        // TODO: react validation? generic javascript validation>
+        // TODO: react validation? generic javascript validation?
         const note = {
             Title: this.state.title,
             Content: this.state.content,
             Created: new Date().toUTCString()
         };
-
-        console.log(note);
 
         $.ajax({
             type: 'POST',
