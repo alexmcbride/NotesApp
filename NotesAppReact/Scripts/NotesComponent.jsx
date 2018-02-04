@@ -96,15 +96,14 @@ class NoteComponent extends React.Component {
 
     onGoBack(evt) {
         router.navigate();
+        evt.preventDefault();
     }
 
     render() {
         return <div className="note-component">
             <Note noteid={this.state.note.Id} title={this.state.note.Title} content={this.state.note.Content} showDelete={false} />
-
-            <form>
-                <input type="button" value="Go back..." onClick={this.onGoBack} />
-            </form>
+        
+            <a href="#" onClick={this.onGoBack}>Go back...</a>
         </div>;
     }
 }
