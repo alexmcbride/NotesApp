@@ -1,7 +1,5 @@
 ﻿
-// Routing stuff
-var content = document.getElementById("content");
-var router = new Navigo(null, true, '#!');
+const router = new Navigo(null, true, '#!');
 
 class Note extends React.Component {
     onSelectNote(evt) {
@@ -47,7 +45,7 @@ class NotesComponent extends React.Component {
     }
 
     onAddNote(evt) {
-        console.log("Submit!!");
+        router.navigate('/notes/add');
         evt.preventDefault();
     }
 
@@ -88,11 +86,85 @@ class NoteComponent extends React.Component {
             <form>
                 <input type="button" value="Go back..." onClick={this.onGoBack} />
             </form>
-        </div>
+        </div>;
     }
 }
 
-router.on('/notes/:id', function (params, query) {
+class AddNoteComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { title: '', content: '' };
+    }
+
+    onTitleChanged(evt) {
+        this.setState({ title: evt.target.value,  });
+    }
+
+    onContentChanged(evt) {
+        this.setState({ content: evt.target.value });
+    }
+
+    onAddNote(evt) {
+        const note = {
+            Title: this.state.title,
+            Content: this.state.content,
+            Created: new Date().toUTCString()
+        };
+
+        console.log(note);
+
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:51781/api/Notes',
+            data: JSON.stringify(note),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (data) {
+                router.navigate('/notes/' + data.Id);
+            },
+            failure: function (errMsg) {
+                alert("Error: " + errMsg);
+            }
+        });
+        evt.preventDefault();
+    }
+
+    onGoBack(evt) {
+        router.navigate();
+    }
+
+    render() {
+        return <div className="add-note">
+            <form onSubmit={this.onAddNote.bind(this)}>
+                <h1>Add Note</h1>
+
+                <label>
+                    Title<br/>
+                    <input type="text" onChange={this.onTitleChanged.bind(this)} />
+                </label>
+
+                <br />
+
+                <label>
+                    Content<br />
+                    <textarea onChange={this.onContentChanged.bind(this)}></textarea>
+                </label>
+
+                <br />
+
+                <input type="submit" value="Add Note" />
+                &nbsp;&nbsp;
+                <input type="button" value="Go back" onClick={this.onGoBack.bind(this)} />
+            </form>
+        </div>;
+    }
+}
+
+// Handle displaying components.
+const content = document.getElementById("content");
+router.on('/notes/add', function () {
+    ReactDOM.render(<AddNoteComponent />, content);
+}).on('/notes/:id', function (params, query) {
     ReactDOM.render(<NoteComponent id={params.id} />, content);
 }).on('*', function () {
     ReactDOM.render(<NotesComponent />, content);
