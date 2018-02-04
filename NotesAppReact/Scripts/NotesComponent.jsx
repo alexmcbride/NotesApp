@@ -1,10 +1,10 @@
 ﻿
+// Global variable for handling routes
 const router = new Navigo(null, true, '#!');
 
 class Note extends React.Component {
     onSelectNote(evt) {
         router.navigate('/notes/' + this.props.noteid);
-
         evt.preventDefault();
     }
 
@@ -105,6 +105,7 @@ class AddNoteComponent extends React.Component {
     }
 
     onAddNote(evt) {
+        // TODO: react validation? generic javascript validation>
         const note = {
             Title: this.state.title,
             Content: this.state.content,
@@ -130,7 +131,8 @@ class AddNoteComponent extends React.Component {
     }
 
     onGoBack(evt) {
-        router.navigate();
+        router.navigate(); // Go to root view
+        evt.preventDefault();
     }
 
     render() {
@@ -153,19 +155,22 @@ class AddNoteComponent extends React.Component {
                 <br />
 
                 <input type="submit" value="Add Note" />
-                &nbsp;&nbsp;
-                <input type="button" value="Go back" onClick={this.onGoBack.bind(this)} />
+                &nbsp;|&nbsp;
+                <a href="#" onClick={this.onGoBack.bind(this)}>Go back</a>
             </form>
         </div>;
     }
 }
 
-// Handle displaying components.
+// Route various URL to their components
 const content = document.getElementById("content");
 router.on('/notes/add', function () {
+    // Display add note component.
     ReactDOM.render(<AddNoteComponent />, content);
 }).on('/notes/:id', function (params, query) {
+    // Show a component displaying the specified note
     ReactDOM.render(<NoteComponent id={params.id} />, content);
 }).on('*', function () {
+    // Root component.
     ReactDOM.render(<NotesComponent />, content);
 }).resolve();
